@@ -1,3 +1,3 @@
-const C='gscwu-v1',F=['./','./index.html','./manifest.json'];
+const C='gscwu-v2',F=['./','./index.html','./manifest.json'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(F))));
 self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));

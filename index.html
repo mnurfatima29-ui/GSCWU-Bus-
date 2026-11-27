@@ -1,110 +1,132 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>GSCWU Bus Tracker</title>
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2563eb"><link rel="icon" href="icon-192.png"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2563eb"><link rel="icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mu:#6b7280;--pr:#2563eb;--ok:#16a34a;--wa:#f59e0b;--ln:#e5e7eb;--map:#e8eef7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mu:#6b7280;--pr:#2563eb;--ok:#16a34a;--wa:#f59e0b;--rd:#dc2626;--ln:#e5e7eb;--map:#e8eef7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1220;--card:#1a1e30;--tx:#eef0f6;--mu:#9aa3b5;--ln:#2a2f45;--map:#1c2438}}
 *{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;max-width:480px;margin:auto;padding:12px}
-h1{font-size:18px;margin:4px 0 10px}
-.tabs,.chips{display:flex;gap:6px;margin-bottom:10px}
-.chips{overflow-x:auto}
-.tabs button,.chips button{flex:1;padding:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:10px;font-size:14px;white-space:nowrap}
-.chips button{flex:none;padding:8px 12px;font-size:13px}
-.tabs button.on,.chips button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+h1{font-size:18px;margin:4px 0}
+.chips{display:flex;gap:6px;margin:10px 0;overflow-x:auto}
+.chips button{flex:none;padding:8px 12px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:10px;font-size:13px;white-space:nowrap}
+.chips button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
 .card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:10px}
 svg{width:100%;height:auto;background:var(--map);border-radius:12px;display:block}
-.stop{cursor:pointer}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--ln);font-size:14px}
 .row:last-child{border:0}
-.btn{padding:7px 12px;border-radius:8px;border:1px solid var(--pr);background:transparent;color:var(--pr);font-size:13px;text-decoration:none}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid var(--pr);background:transparent;color:var(--pr);font-size:13px;text-decoration:none;display:inline-block}
 .btn.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.go{background:var(--ok);border-color:var(--ok);color:#fff;font-size:16px;padding:14px;width:100%}
+.btn.stop{background:var(--rd);border-color:var(--rd);color:#fff;font-size:16px;padding:14px;width:100%}
+.btn.del{border-color:var(--rd);color:var(--rd)}
 .mu{color:var(--mu);font-size:13px}
 .alert{background:var(--wa);color:#111;border-radius:12px;padding:12px;font-weight:600;margin-bottom:10px}
 .toast{background:var(--ok);color:#fff;border-radius:12px;padding:10px;margin-bottom:10px;font-size:14px}
-.big{font-size:26px;font-weight:700}
+.big{font-size:24px;font-weight:700}
 .times span{display:inline-block;padding:4px 9px;border:1px solid var(--ln);border-radius:8px;margin:3px 4px 0 0;font-size:13px}
-.hide{display:none}
 input{width:100%;padding:10px;margin:4px 0 8px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--tx);font-size:14px}
+.hide{display:none}
 </style></head><body>
-<div id="splash" style="text-align:center;padding:40px 8px"><div style="font-size:56px">🚌</div><h1 style="font-size:24px;margin:10px 0 4px">GSCWU Bus Tracker</h1><div class="mu" style="margin-bottom:28px">Government Sadiq College Women University</div><div style="font-weight:600;margin-bottom:12px">Who are you?</div><button class="btn" style="width:100%;padding:18px;font-size:17px;margin-bottom:12px" onclick="start('S')">🎓 I'm a Student</button><button class="btn" style="width:100%;padding:18px;font-size:17px" onclick="start('C')">🧑‍✈️ I'm a Conductor</button></div>
+<div id="splash" style="text-align:center;padding:40px 8px">
+<div style="font-size:56px">🚌</div><h1 style="font-size:24px;margin:10px 0 4px">GSCWU Bus Tracker</h1>
+<div class="mu" style="margin-bottom:28px">Government Sadiq College Women University</div>
+<div style="font-weight:600;margin-bottom:12px">Who are you?</div>
+<button class="btn" style="width:100%;padding:18px;font-size:17px;margin-bottom:12px" onclick="setRole('S')">🎓 I'm a Student</button>
+<button class="btn" style="width:100%;padding:18px;font-size:17px" onclick="$('pin').classList.remove('hide')">🧑‍✈️ I'm a Conductor</button>
+<div id="pin" class="card hide" style="margin-top:14px;text-align:left"><b>Conductor code</b><input id="pc" type="password" inputmode="numeric" placeholder="Enter code"><button class="btn" style="width:100%" onclick="checkPin()">Continue</button><div class="mu" id="pe"></div></div>
+</div>
 <div id="app" class="hide">
-<h1>🚌 GSCWU Bus Tracker</h1>
-<div class="chips" id="chips"></div>
-<div class="tabs"><button id="tS" class="on">🎓 Student</button><button id="tC">🧑‍✈️ Conductor</button></div>
-<div id="msg"></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><h1>🚌 GSCWU Bus</h1><span><span class="mu" id="rl"></span> <a class="btn" href="#" onclick="logout();return false">Switch</a></span></div>
+<div class="chips" id="chips"></div><div id="msg"></div>
 <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><b id="rn"></b><div class="mu" id="rb"></div></div><a class="btn" id="gm" target="_blank" rel="noopener">📍 Google Maps</a></div>
-<svg viewBox="0 0 360 400"><path id="route" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" opacity=".55"/>
-<g id="stops"></g><g id="bus"><circle r="14" fill="#f59e0b" stroke="#fff" stroke-width="2"/><text y="5" text-anchor="middle" font-size="15">🚌</text></g></svg>
+<svg viewBox="0 0 360 400"><path id="route" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" opacity=".55"/><g id="stops"></g>
+<g id="bus" class="hide"><circle r="14" fill="#f59e0b" stroke="#fff" stroke-width="2"/><text y="5" text-anchor="middle" font-size="15">🚌</text></g></svg>
 <div class="mu" style="margin-top:8px">Bus timings:</div><div class="times" id="times"></div></div>
 
 <div id="vS">
+<div class="card"><div id="sst" style="font-weight:600"></div><div class="big" id="eta"></div><div class="mu" id="nx"></div></div>
 <div class="card"><b>Stops</b><div class="mu" style="margin-bottom:4px">Tap "I'm here" at the stop where you are waiting</div><div id="list"></div></div>
-<div class="card"><div id="live" style="font-weight:600;margin-bottom:6px"></div><div class="mu">Bus arrives at next stop in</div><div class="big" id="eta">—</div><div class="mu" id="nx"></div></div>
 </div>
+
 <div id="vC" class="hide">
-<div class="card"><b>Share bus location</b><div class="mu" style="margin:4px 0 8px">Turn this on so students can see where the bus is.</div><button class="btn" id="sh" onclick="share()" style="width:100%;padding:12px">📍 Start sharing my location</button><div class="mu" id="gps" style="margin-top:6px"></div></div>
+<div class="card"><div id="cst" style="font-weight:600;margin-bottom:8px"></div><button id="go" class="btn go" onclick="toggleTrip()"></button><div class="mu" id="gps" style="margin-top:6px"></div></div>
 <div id="al"></div>
-<div class="card"><b>Set up my route</b><div class="mu" style="margin:4px 0">Route name</div><input id="eN" placeholder="e.g. Route 1 – Shell Pump"><div class="mu">Stops in order, separated by commas (first = start)</div><input id="eS" placeholder="GSCWU, Shell Pump, One Unit"><div class="mu">Departure timings, separated by commas</div><input id="eT" placeholder="7:30, 9:00, 1:30"><div style="display:flex;gap:8px"><button class="btn" style="flex:1;padding:11px" onclick="saveRoute(false)">💾 Save this route</button><button class="btn" style="flex:1;padding:11px" onclick="saveRoute(true)">➕ Add as new route</button></div><div class="mu" id="eM" style="margin-top:6px"></div></div>
-<div class="card"><div class="mu">Next stop</div><div class="big" id="cn">—</div><div class="mu" id="cw"></div></div>
-<div class="card"><b>Students waiting</b><div id="wl"></div></div>
+<div class="card"><div class="mu">Next stop</div><div class="big" id="cn">—</div><div class="mu" id="cw"></div><div style="margin-top:8px"><b>Students waiting</b></div><div id="wl"></div></div>
+<div class="card"><b>Set up this bus</b>
+<div class="mu" style="margin:4px 0">Route name</div><input id="eN" placeholder="e.g. Route 1 – Shell Pump">
+<div class="mu">Stops in order, separated by commas (first = start)</div><input id="eS" placeholder="GSCWU, Shell Pump, One Unit">
+<div class="mu">Departure timings, separated by commas</div><input id="eT" placeholder="7:30 AM, 1:30 PM">
+<div style="display:flex;gap:8px"><button class="btn" style="flex:1" onclick="saveRoute(false)">💾 Save</button><button class="btn" style="flex:1" onclick="saveRoute(true)">➕ Add new bus</button><button class="btn del" onclick="delRoute()">🗑</button></div>
+<div class="mu" id="eM" style="margin-top:6px"></div></div>
 </div>
 </div>
 
 <script>
-const R=[
-{name:"Route 1 – Shell Pump",bus:"Bus 01",times:["7:30","9:00","1:30","4:00"],d:"M50,360 C50,260 130,250 130,180 S240,120 310,50",
- stops:[["University",0,0],["Shell Pump",.28,1],["One Unit",.55,2],["Main Chowk",.8,0]]},
-{name:"Route 2 – Gulshan",bus:"Bus 02",times:["7:45","9:15","2:00","4:30"],d:"M40,60 C150,60 120,200 200,220 S320,260 320,360",
- stops:[["University",0,0],["Park Stop",.3,1],["Gulshan Chowk",.6,3],["Bus Terminal",.85,0]]},
-{name:"Route 3 – Cantt",bus:"Bus 03",times:["8:00","10:00","2:30","5:00"],d:"M50,350 L50,200 C50,120 180,150 180,90 L320,60",
- stops:[["University",0,0],["Cantt Gate",.35,2],["Mall Road",.65,1],["Station",.9,0]]}
-].map(r=>({...r,T:Math.random()*.5,prev:0,me:null,stops:r.stops.map(s=>({n:s[0]==='University'?'GSCWU':s[0],t:s[1],w:s[2]}))}));
-let cur=0,toast='';
+const CODE="1234"; // change this before sharing the app with conductors
 const $=id=>document.getElementById(id),route=$('route');
-let L=1;const P=t=>route.getPointAtLength(Math.min(t,1)*L);
-function drawChips(){$('chips').innerHTML=R.map((r,i)=>`<button data-i="${i}">${r.bus}</button>`).join('');
-document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>pick(+b.dataset.i))}
-drawChips();
-function pick(i){cur=i;toast='';const r=R[i];route.setAttribute('d',r.d);L=route.getTotalLength();
- document.querySelectorAll('#chips button').forEach((b,j)=>b.classList.toggle('on',j===i));
- $('rn').textContent=r.name;$('rb').textContent=r.bus+' • daily';
- $('times').innerHTML=r.times.map(t=>`<span>${t}</span>`).join('');
+const st={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const DEF=[
+{name:"Route 1 – Shell Pump",bus:"Bus 01",times:["7:30 AM","1:30 PM"],d:"M50,360 C50,260 130,250 130,180 S240,120 310,50",stops:[["GSCWU",0],["Shell Pump",.28],["One Unit",.55],["Main Chowk",.8]]},
+{name:"Route 2 – Gulshan",bus:"Bus 02",times:["7:45 AM","2:00 PM"],d:"M40,60 C150,60 120,200 200,220 S320,260 320,360",stops:[["GSCWU",0],["Park Stop",.3],["Gulshan Chowk",.6],["Bus Terminal",.85]]},
+{name:"Route 3 – Cantt",bus:"Bus 03",times:["8:00 AM","2:30 PM"],d:"M50,350 L50,200 C50,120 180,150 180,90 L320,60",stops:[["GSCWU",0],["Cantt Gate",.35],["Mall Road",.65],["Station",.9]]}];
+const mk=r=>({name:r.name,bus:r.bus,times:r.times,d:r.d,run:false,at:'',T:0,me:null,stops:r.stops.map(s=>Array.isArray(s)?{n:s[0],t:s[1],w:0}:{n:s.n,t:s.t,w:0})});
+let R=(st.get('routes')||DEF).map(mk),cur=0,role=st.get('role'),toast='',watch=null,L=1;
+const P=t=>route.getPointAtLength(Math.min(t,1)*L);
+const save=()=>st.set('routes',R.map(r=>({name:r.name,bus:r.bus,times:r.times,d:r.d,stops:r.stops.map(s=>({n:s.n,t:s.t}))})));
+const clean=s=>s.replace(/[<>&"'`]/g,'').trim();
+const fmt=d=>d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+function mins(t){const m=/(\d{1,2}):(\d{2})\s*(AM|PM)?/i.exec(t);if(!m)return null;let h=+m[1];if(m[3])h=h%12+(/pm/i.test(m[3])?12:0);return h*60+ +m[2]}
+function nextDep(r){const n=new Date(),now=n.getHours()*60+n.getMinutes(),ts=r.times.map(t=>({t,m:mins(t)})).filter(x=>x.m!==null).sort((a,b)=>a.m-b.m);
+ if(!ts.length)return'not set';const x=ts.find(a=>a.m>now);return x?x.t+' today':ts[0].t+' tomorrow'}
+function setRole(x){role=x;st.set('role',x);enter()}
+function checkPin(){if($('pc').value===CODE)setRole('C');else $('pe').textContent='Wrong code'}
+function logout(){st.set('role',null);role=null;$('app').classList.add('hide');$('splash').classList.remove('hide');$('pin').classList.add('hide');$('pc').value=''}
+function enter(){$('splash').classList.add('hide');$('app').classList.remove('hide');$('vS').classList.toggle('hide',role!=='S');$('vC').classList.toggle('hide',role!=='C');$('rl').textContent=role==='C'?'Conductor':'Student';drawChips();pick(0)}
+function drawChips(){$('chips').innerHTML=R.map((r,i)=>`<button data-i="${i}" class="${i===cur?'on':''}">${r.bus}${r.run?' 🟢':''}</button>`).join('');document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>pick(+b.dataset.i))}
+function pick(i){cur=i;toast='';const r=R[i];route.setAttribute('d',r.d);L=route.getTotalLength();drawChips();
+ $('rn').textContent=r.name;$('rb').textContent=r.bus;$('times').innerHTML=r.times.map(t=>`<span>${t}</span>`).join('');
  const q=encodeURIComponent;$('gm').href=`https://www.google.com/maps/dir/?api=1&origin=${q(r.stops[0].n)}&destination=${q(r.stops[r.stops.length-1].n)}&waypoints=${q(r.stops.slice(1,-1).map(s=>s.n).join('|'))}`;
- $('stops').innerHTML=r.stops.map((s,k)=>{const p=P(s.t);return `<g class="stop" onclick="tick(${k})"><circle cx="${p.x}" cy="${p.y}" r="9" fill="#fff" stroke="#2563eb" stroke-width="3"/><text x="${p.x+14}" y="${p.y+4}" font-size="13" style="fill:var(--tx)">${s.n}</text><text id="b${k}" x="${p.x}" y="${p.y-14}" text-anchor="middle" font-size="12" font-weight="700" style="fill:#d97706"></text></g>`}).join('');
- fillEdit();render()}
+ $('stops').innerHTML=r.stops.map((s,k)=>{const p=P(s.t);return `<g><circle cx="${p.x}" cy="${p.y}" r="9" fill="#fff" stroke="#2563eb" stroke-width="3"/><text x="${p.x+14}" y="${p.y+4}" font-size="13" style="fill:var(--tx)">${s.n}</text><text id="b${k}" x="${p.x}" y="${p.y-14}" text-anchor="middle" font-size="12" font-weight="700" style="fill:#d97706"></text></g>`}).join('');
+ if(role==='C'){$('eN').value=r.name;$('eS').value=r.stops.map(s=>s.n).join(', ');$('eT').value=r.times.join(', ')}
+ render()}
 function tick(k){const r=R[cur];if(k===0)return;if(r.me===k){r.me=null;r.stops[k].w--}else{if(r.me!==null)r.stops[r.me].w--;r.me=k;r.stops[k].w++}render()}
+function toggleTrip(){const r=R[cur];
+ if(r.run){endTrip(r);toast='Trip ended.'}
+ else{r.run=true;r.T=0;r.at=fmt(new Date());
+  if(navigator.geolocation){watch=navigator.geolocation.watchPosition(p=>{$('gps').textContent='📡 Sharing GPS: '+p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4)},()=>{$('gps').textContent='Please allow location permission'},{enableHighAccuracy:true})}}
+ drawChips();render()}
+function endTrip(r){r.run=false;r.T=0;r.me=null;if(watch!==null&&navigator.geolocation){navigator.geolocation.clearWatch(watch);watch=null}$('gps').textContent=''}
 function render(){const r=R[cur],T=r.T;
  r.stops.forEach((s,i)=>{const e=$('b'+i);if(e)e.textContent=s.w>0?'👥'+s.w:''});
- $('list').innerHTML=r.stops.slice(1).map((s,i)=>{i++;return `<div class="row"><span>${s.n} <span class="mu">(${s.w} waiting)</span></span><button class="btn ${r.me===i?'on':''}" onclick="tick(${i})">${r.me===i?"✓ I'm here":"I'm here"}</button></div>`}).join('');
- const n=r.stops.findIndex(s=>s.t>T);
- if(n<0){$('eta').textContent='Route finished';$('nx').textContent='';$('cn').textContent='—';$('cw').textContent='';$('al').innerHTML=''}
- else{const s=r.stops[n],m=Math.max(1,Math.round((s.t-T)/.03*.5));$('eta').textContent='~'+m+' min';$('nx').textContent='→ '+s.n;
-  $('cn').textContent=s.n;$('cw').textContent=s.w+' student(s) waiting';
-  $('al').innerHTML=(s.w>0&&s.t-T<.12)?`<div class="alert">⚠️ ${s.w} student(s) waiting at ${s.n} — stop the bus!</div>`:''}
- $('wl').innerHTML=r.stops.slice(1).map(s=>`<div class="row"><span>${s.n}</span><b>${s.w}</b></div>`).join('');
+ $('bus').classList.toggle('hide',!r.run);
+ const n=r.run?r.stops.findIndex(s=>s.t>T):-1;
+ if(role==='S'){
+  $('sst').textContent=r.run?'🟢 Bus is on the way — departed '+r.at:'⚪ This bus is not running now';
+  $('eta').textContent=r.run?(n>=0?'~'+Math.max(1,Math.round((r.stops[n].t-T)/.03*.5))+' min':'Almost done'):'Next: '+nextDep(r);
+  $('nx').textContent=r.run&&n>=0?'→ '+r.stops[n].n:'';
+  $('list').innerHTML=r.stops.slice(1).map((s,i)=>{i++;return `<div class="row"><span>${s.n} <span class="mu">(${s.w} waiting)</span></span><button class="btn ${r.me===i?'on':''}" onclick="tick(${i})">${r.me===i?"✓ I'm here":"I'm here"}</button></div>`}).join('')}
+ else{
+  $('cst').textContent=r.run?'🟢 Trip running since '+r.at:'⚪ Not started. Next departure: '+nextDep(r);
+  $('go').textContent=r.run?'⏹ End trip':'▶ Start trip';$('go').className='btn '+(r.run?'stop':'go');
+  $('cn').textContent=r.run&&n>=0?r.stops[n].n:'—';$('cw').textContent=r.run&&n>=0?r.stops[n].w+' student(s) waiting here':'Start the trip to see the next stop';
+  $('al').innerHTML=(r.run&&n>=0&&r.stops[n].w>0&&r.stops[n].t-T<.12)?`<div class="alert">⚠️ ${r.stops[n].w} student(s) waiting at ${r.stops[n].n} — stop the bus!</div>`:'';
+  $('wl').innerHTML=r.stops.slice(1).map(s=>`<div class="row"><span>${s.n}</span><b>${s.w}</b></div>`).join('')}
  $('msg').innerHTML=toast?`<div class="toast">${toast}</div>`:''}
-const clean=s=>s.replace(/[<>&"'`]/g,'').trim();
-function fillEdit(){const r=R[cur];$('eN').value=r.name;$('eS').value=r.stops.map(s=>s.n).join(', ');$('eT').value=r.times.join(', ')}
 function saveRoute(isNew){const name=clean($('eN').value),names=$('eS').value.split(',').map(clean).filter(Boolean),times=$('eT').value.split(',').map(clean).filter(Boolean);
- if(!name||names.length<2){$('eM').textContent='Please enter a route name and at least 2 stops.';return}
- const old=R[cur],n=names.length,stops=names.map((x,i)=>({n:x,t:i/(n-1)*.9,w:(!isNew&&old.stops.find(o=>o.n===x))?old.stops.find(o=>o.n===x).w:0}));
- if(isNew){R.push({name,bus:'Bus 0'+(R.length+1),times,d:old.d,stops,T:0,prev:0,me:null});cur=R.length-1}
- else{Object.assign(old,{name,times,stops,me:null});old.T=Math.min(old.T,.99)}
- drawChips();pick(cur);$('eM').textContent='✅ Saved. Students now see the new route and timings.'}
-let last=performance.now();
+ if(!name||names.length<2){$('eM').textContent='Enter a route name and at least 2 stops.';return}
+ const old=R[cur],n=names.length,stops=names.map((x,i)=>({n:x,t:i/(n-1)*.9,w:0}));
+ if(isNew){R.push(mk({name,bus:'Bus '+String(R.length+1).padStart(2,'0'),times,d:old.d,stops}));cur=R.length-1}
+ else{if(old.run)endTrip(old);Object.assign(old,{name,times,stops,me:null})}
+ save();pick(cur);$('eM').textContent='✅ Saved.'}
+function delRoute(){if(R.length<2){$('eM').textContent='You need at least one bus.';return}if(!confirm('Delete '+R[cur].bus+'?'))return;if(R[cur].run)endTrip(R[cur]);R.splice(cur,1);save();cur=0;pick(0)}
+let last=performance.now(),lr=0;
 function loop(now){const dt=(now-last)/1000;last=now;
- R.forEach((r,ri)=>{r.prev=r.T;r.T+=dt*(.025+ri*.004);
-  r.stops.forEach((s,i)=>{if(i>0&&r.prev<s.t&&r.T>=s.t&&s.w>0){if(ri===cur){toast=`✅ ${r.bus}: ${s.w} student(s) picked up at ${s.n}`;setTimeout(()=>{toast='';render()},4000)}if(r.me===i)r.me=null;s.w=0}});
-  if(r.T>=1){r.T=0;r.me=null;r.stops.forEach((s,i)=>{if(i>0&&i<r.stops.length-1)s.w=Math.floor(Math.random()*3)})}});
- const p=P(R[cur].T);$('bus').setAttribute('transform',`translate(${p.x},${p.y})`);render();requestAnimationFrame(loop)}
-let live=false;
-function upd(){$('live').textContent=live?'🟢 Bus is live — conductor is sharing location':'⚪ Conductor is not sharing location yet'}
-function share(){if(live){live=false;$('sh').textContent='📍 Start sharing my location';$('gps').textContent='';upd();return}
- if(!navigator.geolocation){$('gps').textContent='GPS not available';return}
- navigator.geolocation.getCurrentPosition(p=>{live=true;$('sh').textContent='⏹ Stop sharing';$('gps').textContent='Sharing GPS: '+p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);upd()},()=>{$('gps').textContent='Location permission denied'})}
-function show(v){$('vS').classList.toggle('hide',v!=='S');$('vC').classList.toggle('hide',v!=='C');$('tS').classList.toggle('on',v==='S');$('tC').classList.toggle('on',v==='C')}
-function start(v){$('splash').classList.add('hide');$('app').classList.remove('hide');show(v)}
-$('tS').onclick=()=>show('S');$('tC').onclick=()=>show('C');
-pick(0);upd();requestAnimationFrame(loop);
+ R.forEach((r,ri)=>{if(!r.run)return;const pv=r.T;r.T+=dt*(.025+ri*.002);
+  r.stops.forEach((s,i)=>{if(i>0&&pv<s.t&&r.T>=s.t&&s.w>0){if(ri===cur){toast=`✅ ${r.bus}: ${s.w} student(s) picked up at ${s.n}`;setTimeout(()=>{toast='';render()},4000)}if(r.me===i)r.me=null;s.w=0}});
+  if(r.T>=1){endTrip(r);if(ri===cur)toast='Trip finished.';drawChips()}});
+ const r=R[cur];if(r&&r.run&&L>1){const p=P(r.T);$('bus').setAttribute('transform',`translate(${p.x},${p.y})`)}
+ if(now-lr>400){lr=now;if(role)render()}
+ requestAnimationFrame(loop)}
+if(role)enter();requestAnimationFrame(loop);
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script></body></html>
