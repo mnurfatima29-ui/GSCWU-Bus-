@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>GSCWU Bus Tracker</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2563eb"><link rel="icon" href="icon-192.png"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mu:#6b7280;--pr:#2563eb;--ok:#16a34a;--wa:#f59e0b;--ln:#e5e7eb;--map:#e8eef7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1220;--card:#1a1e30;--tx:#eef0f6;--mu:#9aa3b5;--ln:#2a2f45;--map:#1c2438}}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;max-width:480px;margin:auto;padding:12px}
+h1{font-size:18px;margin:4px 0 10px}
+.tabs,.chips{display:flex;gap:6px;margin-bottom:10px}
+.chips{overflow-x:auto}
+.tabs button,.chips button{flex:1;padding:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:10px;font-size:14px;white-space:nowrap}
+.chips button{flex:none;padding:8px 12px;font-size:13px}
+.tabs button.on,.chips button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:10px}
+svg{width:100%;height:auto;background:var(--map);border-radius:12px;display:block}
+.stop{cursor:pointer}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--ln);font-size:14px}
+.row:last-child{border:0}
+.btn{padding:7px 12px;border-radius:8px;border:1px solid var(--pr);background:transparent;color:var(--pr);font-size:13px;text-decoration:none}
+.btn.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.mu{color:var(--mu);font-size:13px}
+.alert{background:var(--wa);color:#111;border-radius:12px;padding:12px;font-weight:600;margin-bottom:10px}
+.toast{background:var(--ok);color:#fff;border-radius:12px;padding:10px;margin-bottom:10px;font-size:14px}
+.big{font-size:26px;font-weight:700}
+.times span{display:inline-block;padding:4px 9px;border:1px solid var(--ln);border-radius:8px;margin:3px 4px 0 0;font-size:13px}
+.hide{display:none}
+input{width:100%;padding:10px;margin:4px 0 8px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--tx);font-size:14px}
+</style></head><body>
+<div id="splash" style="text-align:center;padding:40px 8px"><div style="font-size:56px">🚌</div><h1 style="font-size:24px;margin:10px 0 4px">GSCWU Bus Tracker</h1><div class="mu" style="margin-bottom:28px">Government Sadiq College Women University</div><div style="font-weight:600;margin-bottom:12px">Who are you?</div><button class="btn" style="width:100%;padding:18px;font-size:17px;margin-bottom:12px" onclick="start('S')">🎓 I'm a Student</button><button class="btn" style="width:100%;padding:18px;font-size:17px" onclick="start('C')">🧑‍✈️ I'm a Conductor</button></div>
+<div id="app" class="hide">
+<h1>🚌 GSCWU Bus Tracker</h1>
+<div class="chips" id="chips"></div>
+<div class="tabs"><button id="tS" class="on">🎓 Student</button><button id="tC">🧑‍✈️ Conductor</button></div>
+<div id="msg"></div>
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><b id="rn"></b><div class="mu" id="rb"></div></div><a class="btn" id="gm" target="_blank" rel="noopener">📍 Google Maps</a></div>
+<svg viewBox="0 0 360 400"><path id="route" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+<g id="stops"></g><g id="bus"><circle r="14" fill="#f59e0b" stroke="#fff" stroke-width="2"/><text y="5" text-anchor="middle" font-size="15">🚌</text></g></svg>
+<div class="mu" style="margin-top:8px">Bus timings:</div><div class="times" id="times"></div></div>
+
+<div id="vS">
+<div class="card"><b>Stops</b><div class="mu" style="margin-bottom:4px">Tap "I'm here" at the stop where you are waiting</div><div id="list"></div></div>
+<div class="card"><div id="live" style="font-weight:600;margin-bottom:6px"></div><div class="mu">Bus arrives at next stop in</div><div class="big" id="eta">—</div><div class="mu" id="nx"></div></div>
+</div>
+<div id="vC" class="hide">
+<div class="card"><b>Share bus location</b><div class="mu" style="margin:4px 0 8px">Turn this on so students can see where the bus is.</div><button class="btn" id="sh" onclick="share()" style="width:100%;padding:12px">📍 Start sharing my location</button><div class="mu" id="gps" style="margin-top:6px"></div></div>
+<div id="al"></div>
+<div class="card"><b>Set up my route</b><div class="mu" style="margin:4px 0">Route name</div><input id="eN" placeholder="e.g. Route 1 – Shell Pump"><div class="mu">Stops in order, separated by commas (first = start)</div><input id="eS" placeholder="GSCWU, Shell Pump, One Unit"><div class="mu">Departure timings, separated by commas</div><input id="eT" placeholder="7:30, 9:00, 1:30"><div style="display:flex;gap:8px"><button class="btn" style="flex:1;padding:11px" onclick="saveRoute(false)">💾 Save this route</button><button class="btn" style="flex:1;padding:11px" onclick="saveRoute(true)">➕ Add as new route</button></div><div class="mu" id="eM" style="margin-top:6px"></div></div>
+<div class="card"><div class="mu">Next stop</div><div class="big" id="cn">—</div><div class="mu" id="cw"></div></div>
+<div class="card"><b>Students waiting</b><div id="wl"></div></div>
+</div>
+</div>
+
+<script>
+const R=[
+{name:"Route 1 – Shell Pump",bus:"Bus 01",times:["7:30","9:00","1:30","4:00"],d:"M50,360 C50,260 130,250 130,180 S240,120 310,50",
+ stops:[["University",0,0],["Shell Pump",.28,1],["One Unit",.55,2],["Main Chowk",.8,0]]},
+{name:"Route 2 – Gulshan",bus:"Bus 02",times:["7:45","9:15","2:00","4:30"],d:"M40,60 C150,60 120,200 200,220 S320,260 320,360",
+ stops:[["University",0,0],["Park Stop",.3,1],["Gulshan Chowk",.6,3],["Bus Terminal",.85,0]]},
+{name:"Route 3 – Cantt",bus:"Bus 03",times:["8:00","10:00","2:30","5:00"],d:"M50,350 L50,200 C50,120 180,150 180,90 L320,60",
+ stops:[["University",0,0],["Cantt Gate",.35,2],["Mall Road",.65,1],["Station",.9,0]]}
+].map(r=>({...r,T:Math.random()*.5,prev:0,me:null,stops:r.stops.map(s=>({n:s[0]==='University'?'GSCWU':s[0],t:s[1],w:s[2]}))}));
+let cur=0,toast='';
+const $=id=>document.getElementById(id),route=$('route');
+let L=1;const P=t=>route.getPointAtLength(Math.min(t,1)*L);
+function drawChips(){$('chips').innerHTML=R.map((r,i)=>`<button data-i="${i}">${r.bus}</button>`).join('');
+document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>pick(+b.dataset.i))}
+drawChips();
+function pick(i){cur=i;toast='';const r=R[i];route.setAttribute('d',r.d);L=route.getTotalLength();
+ document.querySelectorAll('#chips button').forEach((b,j)=>b.classList.toggle('on',j===i));
+ $('rn').textContent=r.name;$('rb').textContent=r.bus+' • daily';
+ $('times').innerHTML=r.times.map(t=>`<span>${t}</span>`).join('');
+ const q=encodeURIComponent;$('gm').href=`https://www.google.com/maps/dir/?api=1&origin=${q(r.stops[0].n)}&destination=${q(r.stops[r.stops.length-1].n)}&waypoints=${q(r.stops.slice(1,-1).map(s=>s.n).join('|'))}`;
+ $('stops').innerHTML=r.stops.map((s,k)=>{const p=P(s.t);return `<g class="stop" onclick="tick(${k})"><circle cx="${p.x}" cy="${p.y}" r="9" fill="#fff" stroke="#2563eb" stroke-width="3"/><text x="${p.x+14}" y="${p.y+4}" font-size="13" style="fill:var(--tx)">${s.n}</text><text id="b${k}" x="${p.x}" y="${p.y-14}" text-anchor="middle" font-size="12" font-weight="700" style="fill:#d97706"></text></g>`}).join('');
+ fillEdit();render()}
+function tick(k){const r=R[cur];if(k===0)return;if(r.me===k){r.me=null;r.stops[k].w--}else{if(r.me!==null)r.stops[r.me].w--;r.me=k;r.stops[k].w++}render()}
+function render(){const r=R[cur],T=r.T;
+ r.stops.forEach((s,i)=>{const e=$('b'+i);if(e)e.textContent=s.w>0?'👥'+s.w:''});
+ $('list').innerHTML=r.stops.slice(1).map((s,i)=>{i++;return `<div class="row"><span>${s.n} <span class="mu">(${s.w} waiting)</span></span><button class="btn ${r.me===i?'on':''}" onclick="tick(${i})">${r.me===i?"✓ I'm here":"I'm here"}</button></div>`}).join('');
+ const n=r.stops.findIndex(s=>s.t>T);
+ if(n<0){$('eta').textContent='Route finished';$('nx').textContent='';$('cn').textContent='—';$('cw').textContent='';$('al').innerHTML=''}
+ else{const s=r.stops[n],m=Math.max(1,Math.round((s.t-T)/.03*.5));$('eta').textContent='~'+m+' min';$('nx').textContent='→ '+s.n;
+  $('cn').textContent=s.n;$('cw').textContent=s.w+' student(s) waiting';
+  $('al').innerHTML=(s.w>0&&s.t-T<.12)?`<div class="alert">⚠️ ${s.w} student(s) waiting at ${s.n} — stop the bus!</div>`:''}
+ $('wl').innerHTML=r.stops.slice(1).map(s=>`<div class="row"><span>${s.n}</span><b>${s.w}</b></div>`).join('');
+ $('msg').innerHTML=toast?`<div class="toast">${toast}</div>`:''}
+const clean=s=>s.replace(/[<>&"'`]/g,'').trim();
+function fillEdit(){const r=R[cur];$('eN').value=r.name;$('eS').value=r.stops.map(s=>s.n).join(', ');$('eT').value=r.times.join(', ')}
+function saveRoute(isNew){const name=clean($('eN').value),names=$('eS').value.split(',').map(clean).filter(Boolean),times=$('eT').value.split(',').map(clean).filter(Boolean);
+ if(!name||names.length<2){$('eM').textContent='Please enter a route name and at least 2 stops.';return}
+ const old=R[cur],n=names.length,stops=names.map((x,i)=>({n:x,t:i/(n-1)*.9,w:(!isNew&&old.stops.find(o=>o.n===x))?old.stops.find(o=>o.n===x).w:0}));
+ if(isNew){R.push({name,bus:'Bus 0'+(R.length+1),times,d:old.d,stops,T:0,prev:0,me:null});cur=R.length-1}
+ else{Object.assign(old,{name,times,stops,me:null});old.T=Math.min(old.T,.99)}
+ drawChips();pick(cur);$('eM').textContent='✅ Saved. Students now see the new route and timings.'}
+let last=performance.now();
+function loop(now){const dt=(now-last)/1000;last=now;
+ R.forEach((r,ri)=>{r.prev=r.T;r.T+=dt*(.025+ri*.004);
+  r.stops.forEach((s,i)=>{if(i>0&&r.prev<s.t&&r.T>=s.t&&s.w>0){if(ri===cur){toast=`✅ ${r.bus}: ${s.w} student(s) picked up at ${s.n}`;setTimeout(()=>{toast='';render()},4000)}if(r.me===i)r.me=null;s.w=0}});
+  if(r.T>=1){r.T=0;r.me=null;r.stops.forEach((s,i)=>{if(i>0&&i<r.stops.length-1)s.w=Math.floor(Math.random()*3)})}});
+ const p=P(R[cur].T);$('bus').setAttribute('transform',`translate(${p.x},${p.y})`);render();requestAnimationFrame(loop)}
+let live=false;
+function upd(){$('live').textContent=live?'🟢 Bus is live — conductor is sharing location':'⚪ Conductor is not sharing location yet'}
+function share(){if(live){live=false;$('sh').textContent='📍 Start sharing my location';$('gps').textContent='';upd();return}
+ if(!navigator.geolocation){$('gps').textContent='GPS not available';return}
+ navigator.geolocation.getCurrentPosition(p=>{live=true;$('sh').textContent='⏹ Stop sharing';$('gps').textContent='Sharing GPS: '+p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);upd()},()=>{$('gps').textContent='Location permission denied'})}
+function show(v){$('vS').classList.toggle('hide',v!=='S');$('vC').classList.toggle('hide',v!=='C');$('tS').classList.toggle('on',v==='S');$('tC').classList.toggle('on',v==='C')}
+function start(v){$('splash').classList.add('hide');$('app').classList.remove('hide');show(v)}
+$('tS').onclick=()=>show('S');$('tC').onclick=()=>show('C');
+pick(0);upd();requestAnimationFrame(loop);
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+</script></body></html>
